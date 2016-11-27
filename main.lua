@@ -28,10 +28,13 @@ function love.load()
   psystem:setColors(255, 255, 255, 255, 255, 255, 255, 0) -- Fade to transparency.
 
   ship.engine = make_object(psystem, ship.x + 37, ship.y + 71) 
+  bg_flicker = 0
 end
 
 function love.draw()
+  love.graphics.setColor(255, 255, 255, (223 + math.sin(bg_flicker) * 32))
   draw_object(background)
+  love.graphics.reset()
   draw_object(background2)
   draw_object(ship.engine)
   love.graphics.draw(ship.image, ship.x, ship.y, 0, 0.25, 0.25)
@@ -45,6 +48,7 @@ function love.update(dt)
   missile_move(missile[0], dt)
   missile_move(missile[1], dt)
   background_move(dt)
+  bg_flicker = bg_flicker + dt
 end
 
 function love.keypressed(key)
