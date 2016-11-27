@@ -58,6 +58,8 @@ function love.keypressed(key)
     elseif missile[1].y < 0 then
       start_missile(missile[1], 8)
     end
+  elseif key == "escape" then
+    love.event.push('quit')
   end
 end
 
