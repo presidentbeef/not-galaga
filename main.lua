@@ -52,7 +52,7 @@ function love.update(dt)
 end
 
 function love.keypressed(key)
-  if key == " " then
+  if key == " " or key == "a" or key == "s" then
     if missile[0].y < 0 then
       start_missile(missile[0], 0)
     elseif missile[1].y < 0 then
