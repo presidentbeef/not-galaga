@@ -11,6 +11,9 @@ function love.load()
   ship.left_image = love.graphics.newImage("images/ship_left.png")
   ship.right_image = love.graphics.newImage("images/ship_right.png")
 
+  enemy = make_object(love.graphics.newImage("images/enemy1.png"), width / 2, 3)
+  enemy.mv = 1
+
   background = make_object(love.graphics.newImage("images/background1.png"), 0, -288 * 2)
   background2 = make_object(love.graphics.newImage("images/background2.png"), 0, -288 * 2)
 
@@ -38,6 +41,7 @@ function love.draw()
   draw_object(background2)
   draw_object(ship.engine)
   love.graphics.draw(ship.image, ship.x, ship.y, 0, 0.25, 0.25)
+  draw_object(enemy)
   draw_missile(missile[0])
   draw_missile(missile[1])
 end
@@ -45,8 +49,16 @@ end
 function love.update(dt)
   ship_move(dt)
   engine_move(dt)
+  enemy_move(enemy, dt)
   missile_move(missile[0], dt)
   missile_move(missile[1], dt)
+
+  if enemy:in_box(missile[0]) then
+    missile[0].y = -1000
+  elseif enemy:in_box(missile[1]) then
+    missile[1].y = -1000
+  end
+
   background_move(dt)
   bg_flicker = bg_flicker + dt
 end
@@ -118,7 +130,19 @@ function engine_move(dt)
   ship.engine.x = ship.x + 37
   ship.engine.y = ship.y + 71
 end
-    
+
+function enemy_move(enemy, dt)
+  if enemy.x > max_w then
+    enemy.x = max_w
+    enemy.mv = -1
+  elseif enemy.x < 0 then
+    enemy.x = 0
+    enemy.mv = 1
+  end
+
+  enemy.x = enemy.x + (dt * enemy.mv * 100)
+end
+
 function draw_missile(m)
   if m.y > 0 then
     love.graphics.draw(m.image, m.x, m.y, 0, 0.15, 0.15)
@@ -129,10 +153,25 @@ function draw_object(obj)
   love.graphics.draw(obj.image, obj.x, obj.y)
 end
 
+function in_box(self, obj)
+  return obj.x > self.x and
+  obj.x < self.x + self.w and
+  obj.y > self.y and
+  obj.y < self.y + self.h
+end
+
 function make_object(image, x, y)
-  return {
+  local obj = {
     image = image,
     x = x,
-    y = y
+    y = y,
   }
+
+  if image:type() == "Image" then
+    obj.h = image:getHeight()
+    obj.w = image:getWidth()
+    obj.in_box = in_box
+  end
+
+  return obj
 end
