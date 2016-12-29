@@ -32,6 +32,7 @@ function love.load()
 
   ship.engine = make_object(psystem, ship.x + 37, ship.y + 71) 
   bg_flicker = 0
+  explosions = {}
 end
 
 function love.draw()
@@ -44,6 +45,9 @@ function love.draw()
   draw_object(enemy)
   draw_missile(missile[0])
   draw_missile(missile[1])
+  for _, e in ipairs(explosions) do
+    draw_object(e)
+  end
 end
 
 function love.update(dt)
@@ -54,13 +58,21 @@ function love.update(dt)
   missile_move(missile[1], dt)
 
   if enemy:in_box(missile[0]) then
+    explode(missile[0].x, missile[0].y)
     missile[0].y = -1000
+    enemy.y = -1000
   elseif enemy:in_box(missile[1]) then
+    explode(missile[1].x, missile[1].y)
     missile[1].y = -1000
+    enemy.y = -1000
   end
 
   background_move(dt)
   bg_flicker = bg_flicker + dt
+
+  for _, e in ipairs(explosions) do
+    e.image:update(dt)
+  end
 end
 
 function love.keypressed(key)
@@ -140,7 +152,7 @@ function enemy_move(enemy, dt)
     enemy.mv = 1
   end
 
-  enemy.x = enemy.x + (dt * enemy.mv * 100)
+  enemy.x = enemy.x + (dt * enemy.mv * 150)
 end
 
 function draw_missile(m)
@@ -174,4 +186,19 @@ function make_object(image, x, y)
   end
 
   return obj
+end
+
+function explode(x, y)
+  local img = love.graphics.newImage("images/yellow.png")
+  local psystem = love.graphics.newParticleSystem(img, 30)
+  psystem:setParticleLifetime(0.1, 0.5)
+  psystem:setSizeVariation(0.5)
+  psystem:setLinearAcceleration(-300, -300, 300, 300)
+  psystem:setSpeed(-200, 200)
+  psystem:setColors(255, 255, 255, 255, 255, 255, 255, 0) -- Fade to transparency.
+  psystem:emit(30)
+
+  local e = make_object(psystem, x, y)
+
+  table.insert(explosions, e)
 end
