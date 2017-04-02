@@ -3,7 +3,9 @@ function love.load()
   love.window.setTitle("Not Galaga")
 
   local width, height = love.window.getDimensions()
-  max_w = width - 70
+  ship_max_w = width - 70
+  w_max_w = width
+  w_max_h = height
   
   ship = make_object(love.graphics.newImage("images/ship.png"), width / 2, height - 100)
 
@@ -11,8 +13,12 @@ function love.load()
   ship.left_image = love.graphics.newImage("images/ship_left.png")
   ship.right_image = love.graphics.newImage("images/ship_right.png")
 
-  enemy = make_object(love.graphics.newImage("images/enemy1.png"), width / 2, 3)
-  enemy.mv = 1
+  enemies = {}
+  table.insert(enemies, make_enemy("images/enemy1.png", width / 2, 10, sine_down))
+  table.insert(enemies, make_enemy("images/enemy1.png", width / 2 + 30, 10, opposite))
+  table.insert(enemies, make_enemy("images/enemy1.png", width / 2 - 100, -25, sine_down))
+  table.insert(enemies, make_enemy("images/enemy1.png", width / 2 + 100, -50, sine_down))
+  table.insert(enemies, make_enemy("images/enemy1.png", width / 2 - 60, 10))
 
   background = make_object(love.graphics.newImage("images/background1.png"), 0, -288 * 2)
   background2 = make_object(love.graphics.newImage("images/background2.png"), 0, -288 * 2)
@@ -42,7 +48,9 @@ function love.draw()
   draw_object(background2)
   draw_object(ship.engine)
   love.graphics.draw(ship.image, ship.x, ship.y, 0, 0.25, 0.25)
-  draw_object(enemy)
+  for _, e in ipairs(enemies) do
+    draw_object(e)
+  end
   draw_missile(missile[0])
   draw_missile(missile[1])
   for _, e in ipairs(explosions) do
@@ -53,18 +61,22 @@ end
 function love.update(dt)
   ship_move(dt)
   engine_move(dt)
-  enemy_move(enemy, dt)
+  for _, e in ipairs(enemies) do
+    enemy_move(e, dt)
+  end
   missile_move(missile[0], dt)
   missile_move(missile[1], dt)
 
-  if enemy:in_box(missile[0]) then
-    explode(missile[0].x, missile[0].y)
-    missile[0].y = -1000
-    enemy.y = -1000
-  elseif enemy:in_box(missile[1]) then
-    explode(missile[1].x, missile[1].y)
-    missile[1].y = -1000
-    enemy.y = -1000
+  for _, enemy in ipairs(enemies) do
+    if enemy:in_box(missile[0]) then
+      explode(missile[0].x, missile[0].y)
+      missile[0].y = -1000
+      enemy.y = -1000
+    elseif enemy:in_box(missile[1]) then
+      explode(missile[1].x, missile[1].y)
+      missile[1].y = -1000
+      enemy.y = -1000
+    end
   end
 
   background_move(dt)
@@ -109,8 +121,8 @@ function ship_move(dt)
     ship.image = ship.main_image
   end
 
-  if ship.x >= max_w then
-    ship.x = max_w
+  if ship.x >= ship_max_w then
+    ship.x = ship_max_w
   elseif ship.x < 0 then
     ship.x = 0
   end
@@ -144,15 +156,7 @@ function engine_move(dt)
 end
 
 function enemy_move(enemy, dt)
-  if enemy.x > max_w then
-    enemy.x = max_w
-    enemy.mv = -1
-  elseif enemy.x < 0 then
-    enemy.x = 0
-    enemy.mv = 1
-  end
-
-  enemy.x = enemy.x + (dt * enemy.mv * 150)
+  enemy:movement(dt)
 end
 
 function draw_missile(m)
@@ -188,6 +192,20 @@ function make_object(image, x, y)
   return obj
 end
 
+function make_enemy(image_src, x, y, movement)
+  local enemy = make_object(love.graphics.newImage(image_src), x, y)
+  enemy.mv = 1
+  enemy.max_w = w_max_w - enemy.image:getWidth()
+
+  if movement then
+    enemy.movement = movement 
+  else
+    enemy.movement = right_left_down
+  end
+
+  return enemy
+end
+
 function explode(x, y)
   local img = love.graphics.newImage("images/yellow.png")
   local psystem = love.graphics.newParticleSystem(img, 30)
@@ -201,4 +219,58 @@ function explode(x, y)
   local e = make_object(psystem, x, y)
 
   table.insert(explosions, e)
+end
+
+--- Enemy Movement
+
+function right_left_down(enemy, dt)
+  if enemy.x > enemy.max_w then
+    enemy.x = enemy.max_w
+    enemy.y = enemy.y + 10
+    enemy.mv = -1
+  elseif enemy.x < 0 then
+    enemy.x = 0
+    enemy.y = enemy.y + 10
+    enemy.mv = 1
+  end
+
+  if enemy.y > w_max_h then
+    enemy.y = 0
+  end
+
+  enemy.x = enemy.x + (dt * enemy.mv * 250)
+end
+
+function sine_down(enemy, dt)
+  enemy.y = enemy.y + (dt * 100)
+  enemy.x = enemy.x + (math.sin(dt * enemy.y * math.pi / 2) * 1.25)
+  if enemy.x > enemy.max_w then
+    enemy. x = 0
+  end
+
+  if enemy.y > w_max_h then
+    enemy.y = 0
+  end
+end
+
+function opposite(enemy, dt)
+  if math.abs(enemy.x - ship.x) < 50 then
+    if enemy.x > ship.x then
+      enemy.x = enemy.x + 1
+    else
+      enemy.x = enemy.x - 1
+    end
+  elseif math.abs(enemy.x - ship.x) > 60 then
+    if enemy.x > ship.x then
+      enemy.x = enemy.x - 1
+    else
+      enemy.x = enemy.x + 1
+    end
+  end
+
+  if enemy.x > enemy.max_w then
+    enemy.x = enemy.max_w
+  elseif enemy.x < 0 then
+    enemy.x = 0
+  end
 end
