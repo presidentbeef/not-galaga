@@ -69,15 +69,18 @@ function love.update(dt)
   missile_move(missile[0], dt)
   missile_move(missile[1], dt)
 
-  for _, enemy in ipairs(enemies) do
+  local deleted = {}
+
+  for i, enemy in ipairs(enemies) do
     if enemy:in_box(missile[0]) then
       explode(missile[0].x, missile[0].y)
       missile[0].y = -1000
       enemy.y = -1000
+      table.insert(deleted, i)
     elseif enemy:in_box(missile[1]) then
       explode(missile[1].x, missile[1].y)
       missile[1].y = -1000
-      enemy.y = -1000
+      table.insert(deleted, i)
     end
   end
 
@@ -86,6 +89,10 @@ function love.update(dt)
 
   for _, e in ipairs(explosions) do
     e.image:update(dt)
+  end
+
+  for _, d in ipairs(deleted) do
+    table.remove(enemies, d)
   end
 end
 
