@@ -14,18 +14,20 @@ function love.load()
   ship.right_image = love.graphics.newImage("images/ship_right.png")
 
   enemies = {}
-  table.insert(enemies, make_enemy("images/enemy1.png", width / 2, 10, sine_down))
-  table.insert(enemies, make_enemy("images/enemy1.png", width / 2 + 30, 10, opposite))
-  table.insert(enemies, make_enemy("images/enemy1.png", width / 2 - 100, -25, sine_down))
-  table.insert(enemies, make_enemy("images/enemy1.png", width / 2 + 100, -50, sine_down))
-  table.insert(enemies, make_enemy("images/enemy1.png", width / 2 - 60, 10))
+  local enemy_1 = love.graphics.newImage("images/enemy1.png")
+  table.insert(enemies, make_enemy(enemy_1, width / 2, 10, sine_down))
+  table.insert(enemies, make_enemy(enemy_1, width / 2 + 30, 10, opposite))
+  table.insert(enemies, make_enemy(enemy_1, width / 2 - 100, -25, sine_down))
+  table.insert(enemies, make_enemy(enemy_1, width / 2 + 100, -50, sine_down))
+  table.insert(enemies, make_enemy(enemy_1, width / 2 - 60, 10))
 
   background = make_object(love.graphics.newImage("images/background1.png"), 0, -288 * 2)
   background2 = make_object(love.graphics.newImage("images/background2.png"), 0, -288 * 2)
 
   missile = {}
-  missile[0] = make_object(love.graphics.newImage("images/missile.png"), -1, -1)
-  missile[1] = make_object(love.graphics.newImage("images/missile.png"), -1, -1)
+  local missile_image = love.graphics.newImage("images/missile.png")
+  missile[0] = make_object(missile_image, -1, -1)
+  missile[1] = make_object(missile_image, -1, -1)
 
   local img = love.graphics.newImage("images/red.png")
 
@@ -193,7 +195,7 @@ function make_object(image, x, y)
 end
 
 function make_enemy(image_src, x, y, movement)
-  local enemy = make_object(love.graphics.newImage(image_src), x, y)
+  local enemy = make_object(image_src, x, y)
   enemy.mv = 1
   enemy.max_w = w_max_w - enemy.image:getWidth()
 
