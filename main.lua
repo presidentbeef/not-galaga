@@ -2,7 +2,7 @@ function love.load()
   love.window.setMode(244 * 2, 288 * 2)
   love.window.setTitle("Not Galaga")
 
-  local width, height = love.window.getDimensions()
+  local width, height, _ = love.window.getMode()
   ship_max_w = width - 70
   w_max_w = width
   w_max_h = height
