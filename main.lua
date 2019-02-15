@@ -230,7 +230,7 @@ function love.draw()
   love.graphics.reset()
   draw_object(background2)
   draw_object(ship.engine)
-  love.graphics.draw(ship.image, ship.x, ship.y, 0, 0.25, 0.25)
+  draw_object(ship)
   for _, e in ipairs(enemies) do
     draw_object(e)
   end
