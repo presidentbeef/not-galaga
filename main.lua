@@ -1,3 +1,15 @@
+local enemy_1 = love.graphics.newImage("images/enemy1.png")
+local function reset_enemies(width)
+  local enemies = {}
+  table.insert(enemies, make_enemy(enemy_1, width / 2, 10, sine_down))
+  table.insert(enemies, make_enemy(enemy_1, width / 2 + 30, 10, opposite))
+  table.insert(enemies, make_enemy(enemy_1, width / 2 - 100, -25, sine_down))
+  table.insert(enemies, make_enemy(enemy_1, width / 2 + 100, -50, sine_down))
+  table.insert(enemies, make_enemy(enemy_1, width / 2 - 60, 10))
+
+  return enemies
+end
+
 function love.load()
   love.window.setMode(244 * 2, 288 * 2)
   love.window.setTitle("Not Galaga")
@@ -13,14 +25,7 @@ function love.load()
   ship.left_image = love.graphics.newImage("images/ship_left.png")
   ship.right_image = love.graphics.newImage("images/ship_right.png")
 
-  enemies = {}
-  local enemy_1 = love.graphics.newImage("images/enemy1.png")
-  table.insert(enemies, make_enemy(enemy_1, width / 2, 10, sine_down))
-  table.insert(enemies, make_enemy(enemy_1, width / 2 + 30, 10, opposite))
-  table.insert(enemies, make_enemy(enemy_1, width / 2 - 100, -25, sine_down))
-  table.insert(enemies, make_enemy(enemy_1, width / 2 + 100, -50, sine_down))
-  table.insert(enemies, make_enemy(enemy_1, width / 2 - 60, 10))
-
+  enemies = reset_enemies(width)
   background = make_object(love.graphics.newImage("images/background1.png"), 0, -288 * 2)
   background2 = make_object(love.graphics.newImage("images/background2.png"), 0, -288 * 2)
 
@@ -93,6 +98,10 @@ function love.update(dt)
 
   for _, d in ipairs(deleted) do
     table.remove(enemies, d)
+  end
+
+  if #enemies == 0 then
+    enemies = reset_enemies(w_max_w)
   end
 end
 
