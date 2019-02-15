@@ -80,7 +80,7 @@ function draw_object(obj)
   love.graphics.draw(obj.image, obj.x, obj.y)
 end
 
-function in_box(self, obj)
+local function in_box(self, obj)
   return obj.y > self.y and
   obj.y < self.y + self.h and
   obj.x > self.x and
@@ -261,6 +261,9 @@ function love.update(dt)
     elseif enemy:in_box(missile[1]) then
       explode(missile[1].x, missile[1].y)
       missile[1].y = -1000
+      table.insert(deleted, i)
+    elseif ship:in_box(enemy) then
+      explode(enemy.x, enemy.y)
       table.insert(deleted, i)
     end
   end
