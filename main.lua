@@ -223,6 +223,7 @@ function love.load()
   bg_flicker = 0
   explosions = {}
   enemies = reset_enemies(width)
+  paused = false
 end
 
 function love.draw()
@@ -234,6 +235,11 @@ function love.draw()
   if not ship.dead then
     draw_object(ship.engine)
     draw_object(ship)
+
+    if paused then
+      love.graphics.setNewFont(40)
+      love.graphics.printf("- Paused -", 0, w_max_h / 3, w_max_w, 'center')
+    end
   else
     love.graphics.setNewFont(40)
     love.graphics.printf("Game Over", 0, w_max_h / 3, w_max_w, 'center')
@@ -252,6 +258,10 @@ function love.draw()
 end
 
 function love.update(dt)
+  if paused then
+    return
+  end
+
   if not ship.dead then
     ship_move(dt)
     engine_move(dt)
@@ -312,16 +322,17 @@ end
 function love.keypressed(key)
   if key == "escape" then
     love.event.push('quit')
-    return
-  end
-
-  if not ship.dead then
+  elseif paused then
+    paused = false
+  elseif not ship.dead then
     if key == "space" or key == "a" or key == "s" then
       if missile[0].y < 0 then
         start_missile(missile[0], 0)
       elseif missile[1].y < 0 then
         start_missile(missile[1], 8)
       end
+    elseif key == "p" then
+      paused = true
     end
   else
     if key ~= "right" and
