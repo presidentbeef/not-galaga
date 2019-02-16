@@ -1,6 +1,6 @@
 WIP Galaga-like game using LÖVE.
 
-![Not Galaga](https://cloud.githubusercontent.com/assets/75613/20247662/a2d46556-a986-11e6-9039-14c0dce6296a.png)
+![Not Galaga]((https://user-images.githubusercontent.com/75613/52895551-167f0780-3171-11e9-86f5-4faf18383cdb.png))
 
 ### How to Run
 
