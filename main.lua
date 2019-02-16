@@ -122,8 +122,8 @@ function explode(x, y)
   local psystem = love.graphics.newParticleSystem(img, 30)
   psystem:setParticleLifetime(0.1, 0.5)
   psystem:setSizeVariation(0.5)
-  psystem:setLinearAcceleration(-300, -300, 300, 300)
-  psystem:setSpeed(-200, 200)
+  psystem:setSpeed(0, 150)
+  psystem:setSpread(6)
   psystem:setColors(255, 255, 255, 255, 255, 255, 255, 0) -- Fade to transparency.
   psystem:emit(30)
 
