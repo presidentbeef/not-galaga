@@ -200,8 +200,8 @@ function love.load()
   ship.main_image = ship.image
   ship.left_image = love.graphics.newImage("images/ship_left.png")
   ship.right_image = love.graphics.newImage("images/ship_right.png")
+  ship.dead = false
 
-  enemies = reset_enemies(width)
   background = make_object(love.graphics.newImage("images/background1.png"), 0, -288 * 2)
   background2 = make_object(love.graphics.newImage("images/background2.png"), 0, -288 * 2)
 
@@ -222,6 +222,7 @@ function love.load()
   ship.engine = make_object(psystem, ship.x + 37, ship.y + 71)
   bg_flicker = 0
   explosions = {}
+  enemies = reset_enemies(width)
 end
 
 function love.draw()
@@ -229,24 +230,37 @@ function love.draw()
   draw_object(background)
   love.graphics.reset()
   draw_object(background2)
-  draw_object(ship.engine)
-  draw_object(ship)
+
+  if not ship.dead then
+    draw_object(ship.engine)
+    draw_object(ship)
+  else
+    love.graphics.setNewFont(40)
+    love.graphics.printf("Game Over", 0, w_max_h / 3, w_max_w, 'center')
+  end
+
   for _, e in ipairs(enemies) do
     draw_object(e)
   end
+
   draw_missile(missile[0])
   draw_missile(missile[1])
+
   for _, e in ipairs(explosions) do
     draw_object(e)
   end
 end
 
 function love.update(dt)
-  ship_move(dt)
-  engine_move(dt)
+  if not ship.dead then
+    ship_move(dt)
+    engine_move(dt)
+  end
+
   for _, e in ipairs(enemies) do
     enemy_move(e, dt)
   end
+
   missile_move(missile[0], dt)
   missile_move(missile[1], dt)
 
@@ -262,8 +276,11 @@ function love.update(dt)
       explode(missile[1].x, missile[1].y)
       missile[1].y = -1000
       table.insert(deleted, i)
-    elseif ship:in_box(enemy) then
+    elseif not ship.dead and ship:in_box(enemy) then
       explode(enemy.x, enemy.y)
+      explode(ship.x + 35, ship.y + 35)
+      ship.dead = true
+      ship.y = -1000
       table.insert(deleted, i)
     end
   end
@@ -284,14 +301,39 @@ function love.update(dt)
   end
 end
 
+local function reset_game()
+  ship.x = w_max_w / 2
+  ship.y = w_max_h - 100
+  ship.dead = false
+
+  enemies = reset_enemies(w_max_w)
+end
+
 function love.keypressed(key)
-  if key == " " or key == "a" or key == "s" then
-    if missile[0].y < 0 then
-      start_missile(missile[0], 0)
-    elseif missile[1].y < 0 then
-      start_missile(missile[1], 8)
-    end
-  elseif key == "escape" then
+  if key == "escape" then
     love.event.push('quit')
+    return
+  end
+
+  if not ship.dead then
+    if key == "space" or key == "a" or key == "s" then
+      if missile[0].y < 0 then
+        start_missile(missile[0], 0)
+      elseif missile[1].y < 0 then
+        start_missile(missile[1], 8)
+      end
+    end
+  else
+    if key ~= "right" and
+      key ~= "left" and
+      key ~= "up" and
+      key ~= "down" and
+      key ~= "a" and
+      key ~= "s" and
+      key ~= "w" and
+      key ~= "d" then
+
+      reset_game()
+    end
   end
 end
